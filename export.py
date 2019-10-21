@@ -35,7 +35,10 @@ def getTranslation(translations, key, language):
 def getFilenameForLanguage(filename, language):
 	return filename[0:filename.rfind('/')] + "-" + language + "/strings.xml"
 
-def doExport(filename, languages):
+def doExport(filename, languages, output):
+	if output == None or output == "":
+		output = "./out.csv"
+
 	translations = []
 	for language in languages:
 		stringsFilename = getFilenameForLanguage(filename, language)
@@ -48,7 +51,7 @@ def doExport(filename, languages):
 			dictionary["xmldoc"] = xmldoc
 			translations.append(dictionary)
 
-	file = open("out.csv", "w")
+	file = open(output, "w")
 
 	xmldoc = minidom.parse(filename)
 	stringElements = xmldoc.getElementsByTagName("string")
@@ -80,11 +83,12 @@ def doExport(filename, languages):
 parser = argparse.ArgumentParser()
 parser.add_argument("--filename", action="store")
 parser.add_argument("--languages", action="store")
+parser.add_argument("--output", action="store")
 results = parser.parse_args()
 
-if "filename" not in results or results.filename is None:
-	print("usage: ./export.py --filename </PATH/TO/strings.xml> --languages <COMMA_SEPARATED_LANGUAGES>")
-	print("example: ./export.py --filename ./app/src/main/res/values/strings.xml --languages=sv,no,fi")
+if "filename" not in results or results.filename is None or "output" not in results:
+	print("usage: ./export.py --filename </PATH/TO/strings.xml> --languages <COMMA_SEPARATED_LANGUAGES> --output <FILENAME>")
+	print("example: ./export.py --filename ./app/src/main/res/values/strings.xml --languages=sv,no,fi --output ./out.csv")
 else:
 	languages = results.languages.split(',')
-	doExport(results.filename, languages)
+	doExport(results.filename, languages, results.output)
